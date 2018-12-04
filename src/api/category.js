@@ -1,6 +1,6 @@
 import request from '../utils/request';
 
-const wrapUrl = url => `https://www.hotbody.wang/${url}`;
+const wrapUrl = url => `https://sevenrabbit.cn/${url}`;
 // const wrapUrl = url => `http://localhost:3000/${url}`;
 
 const getCategory = () => request(wrapUrl('category'));

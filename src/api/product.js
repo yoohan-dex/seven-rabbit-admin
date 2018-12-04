@@ -1,7 +1,7 @@
 import { stringify } from 'qs';
 import request from '../utils/request';
 
-const wrapUrl = url => `https://www.hotbody.wang/${url}`;
+const wrapUrl = url => `https://sevenrabbit.cn/${url}`;
 // const wrapUrl = url => `http://localhost:3000/${url}`;
 
 const getProducts = params => request(wrapUrl(`product?${stringify(params)}`));
