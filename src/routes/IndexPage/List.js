@@ -1,16 +1,16 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Icon, List, Popconfirm } from 'antd';
+import { Card, Button, Icon, List, Popconfirm, Pagination } from 'antd';
 
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
-
-import Form from './components/CategoryForm';
 import { BackgroundImage } from './share';
 import styles from './share.less';
 
-@connect(({ category, loading }) => ({
-  category,
-  loading: loading.models.category,
+import Form from './components/buyerShowForm';
+
+@connect(({ loading, buyerShow }) => ({
+  buyerShow,
+  loading: loading.models.buyerShow,
 }))
 export default class CardList extends PureComponent {
   state = {
@@ -18,22 +18,29 @@ export default class CardList extends PureComponent {
   };
 
   componentDidMount() {
+    this.getList();
+  }
+
+  getList = (page = 1) => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'category/fetchCategory',
+      type: 'buyerShow/fetch',
       payload: {
-        page: 20,
+        page,
+        size: 8,
+        type: 'video',
       },
     });
-  }
+  };
 
   handleEdit = item => () => {
     const { dispatch } = this.props;
+
     this.setState({
       selectedItem: item,
     });
     dispatch({
-      type: 'category/toggle',
+      type: 'buyerShow/toggle',
       payload: true,
     });
   };
@@ -42,7 +49,18 @@ export default class CardList extends PureComponent {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'category/toggle',
+      type: 'buyerShow/toggle',
+      payload: true,
+    });
+  };
+
+  handleEdit = item => () => {
+    const { dispatch } = this.props;
+    this.setState({
+      selectedItem: item,
+    });
+    dispatch({
+      type: 'buyerShow/toggle',
       payload: true,
     });
   };
@@ -51,7 +69,7 @@ export default class CardList extends PureComponent {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'category/del',
+      type: 'buyerShow/del',
       payload: id,
     });
   };
@@ -63,13 +81,17 @@ export default class CardList extends PureComponent {
       selectedItem: '',
     });
     dispatch({
-      type: 'category/toggle',
+      type: 'buyerShow/toggle',
       payload: false,
     });
   };
 
+  handlePageChange = page => {
+    this.getList(page);
+  };
+
   render() {
-    const { category, loading } = this.props;
+    const { loading, buyerShow } = this.props;
     const { selectedItem } = this.state;
     const actions = item => [
       <a onClick={this.handleEdit(item)}>编辑</a>,
@@ -85,34 +107,45 @@ export default class CardList extends PureComponent {
     ];
 
     return (
-      <PageHeaderLayout title="分类列表">
+      <PageHeaderLayout
+        content={
+          <Pagination
+            onChange={this.handlePageChange}
+            current={buyerShow.page}
+            pageSize={8}
+            defaultCurrent={1}
+            total={buyerShow.total}
+          />
+        }
+        title="买家秀列表"
+      >
         <div className={styles.cardList}>
           <List
             rowKey="id"
             loading={loading}
             grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}
-            dataSource={['', ...category.categories]}
+            dataSource={['', ...buyerShow.list]}
             renderItem={item =>
               item ? (
                 <List.Item key={item.id}>
                   <Card
                     hoverable
                     className={styles.card}
-                    cover={<BackgroundImage url={item.image.url} />}
+                    cover={<BackgroundImage url={item.cover && item.cover.url} />}
                     actions={actions(item)}
                   />
                 </List.Item>
               ) : (
                 <List.Item>
                   <Button type="dashed" onClick={this.handleAdd} className={styles.newButton}>
-                    <Icon type="plus" /> 新增分类
+                    <Icon type="plus" /> 新增买家秀
                   </Button>
                 </List.Item>
               )
             }
           />
         </div>
-        <Form visible={category.toggle} closeModal={this.closeModal} selected={selectedItem} />
+        <Form visible={buyerShow.toggle} closeModal={this.closeModal} selected={selectedItem} />
       </PageHeaderLayout>
     );
   }

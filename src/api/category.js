@@ -1,32 +1,33 @@
 import request from '../utils/request';
+import { wrapUrl } from '../utils/utils';
 
-const wrapUrl = url => `https://sevenrabbit.cn/${url}`;
-// const wrapUrl = url => `http://localhost:3000/${url}`;
-
-const getCategory = () => request(wrapUrl('category'));
+const url = wrapUrl('category');
+const getCategory = () => request(url);
 
 const getOne = id => request(wrapUrl(`category/${id}`));
 
-const addCategory = ({ name, filters, image }) =>
-  request(wrapUrl('category'), {
+const addCategory = ({ name, filters, image, orderId }) =>
+  request(url, {
     method: 'POST',
     body: {
       name,
       filters,
       image,
+      orderId: parseInt(orderId, 10),
     },
   });
-const modCategory = ({ id, name, filters, image }) =>
+const modCategory = ({ id, name, filters, image, orderId }) =>
   request(wrapUrl(`category/${id}`), {
     method: 'POST',
     body: {
       name,
       filters,
       image,
+      orderId: parseInt(orderId, 10),
     },
   });
 const delCategory = id =>
-  request(`${wrapUrl('category')}/${id}`, {
+  request(`${url}/${id}`, {
     method: 'DELETE',
   });
 

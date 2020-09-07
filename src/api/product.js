@@ -1,15 +1,23 @@
 import { stringify } from 'qs';
 import request from '../utils/request';
+import { wrapUrl } from '../utils/utils';
 
-const wrapUrl = url => `https://sevenrabbit.cn/${url}`;
-// const wrapUrl = url => `http://localhost:3000/${url}`;
+const url = wrapUrl('product');
 
-const getProducts = params => request(wrapUrl(`product?${stringify(params)}`));
-
-const addProduct = ({ name, detail, category, cover, features }) =>
-  request(wrapUrl('product'), {
+const getProducts = hot => params =>
+  hot
+    ? request(`${url}/new-hot-admin?${stringify(params)}`)
+    : request(`${url}?${stringify(params)}`);
+const getProductOrder = type => request(`${url}/new-hot-sort?type=${type}`);
+const updateProductOrder = (ids, type) => () => {
+  return request(`${url}/new-hot-sort`, { method: 'POST', body: { ids, type } });
+};
+const addProduct = ({ name, detail, category, cover, features, hot, hotType }) =>
+  request(url, {
     method: 'POST',
     body: {
+      hotType,
+      hot,
       name,
       detail,
       category,
@@ -17,12 +25,14 @@ const addProduct = ({ name, detail, category, cover, features }) =>
       features,
     },
   });
-const modProduct = ({ id, name, cover, detail, features, category }) =>
+const modProduct = ({ id, name, cover, detail, features, category, hot, hotType }) =>
   request(wrapUrl(`product/${id}`), {
     method: 'POST',
     body: {
+      hotType,
       id,
       name,
+      hot,
       cover,
       detail,
       category,
@@ -30,7 +40,7 @@ const modProduct = ({ id, name, cover, detail, features, category }) =>
     },
   });
 const delProduct = id =>
-  request(`${wrapUrl('product')}/${id}`, {
+  request(`${url}/${id}`, {
     method: 'DELETE',
   });
 export default {
@@ -38,4 +48,6 @@ export default {
   addProduct,
   modProduct,
   delProduct,
+  getProductOrder,
+  updateProductOrder,
 };

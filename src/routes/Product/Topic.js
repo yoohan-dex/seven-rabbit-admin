@@ -1,35 +1,32 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Icon, List, Popconfirm, Pagination, Input, Switch, Select } from 'antd';
+import { Card, Button, Icon, List, Popconfirm, Pagination, Input } from 'antd';
 
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import { BackgroundImage } from './share';
 import styles from './share.less';
 
-import Form from './components/ProductForm';
+import Form from './components/TopicForm';
 
-@connect(({ loading, product }) => ({
-  product,
-  loading: loading.models.product,
+@connect(({ loading, topic }) => ({
+  topic,
+  loading: false,
 }))
-export default class CardList extends PureComponent {
+export default class TopicCardList extends PureComponent {
   state = {
     selectedItem: '',
     itemOrder: '',
   };
 
   componentDidMount() {
-    this.getProducts();
+    this.getTopics();
   }
 
-  getProducts = (page = 1) => {
+  getTopics = () => {
+    console.log('get topics');
     const { dispatch } = this.props;
     dispatch({
-      type: 'product/fetch',
-      payload: {
-        page,
-        size: 8,
-      },
+      type: 'topic/fetch',
     });
   };
 
@@ -40,7 +37,7 @@ export default class CardList extends PureComponent {
       selectedItem: item,
     });
     dispatch({
-      type: 'product/toggle',
+      type: 'topic/toggle',
       payload: true,
     });
   };
@@ -49,7 +46,7 @@ export default class CardList extends PureComponent {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'product/toggle',
+      type: 'topic/toggle',
       payload: true,
     });
   };
@@ -60,7 +57,7 @@ export default class CardList extends PureComponent {
       selectedItem: item,
     });
     dispatch({
-      type: 'product/toggle',
+      type: 'topic/toggle',
       payload: true,
     });
   };
@@ -69,7 +66,7 @@ export default class CardList extends PureComponent {
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'product/del',
+      type: 'topic/del',
       payload: id,
     });
   };
@@ -81,18 +78,13 @@ export default class CardList extends PureComponent {
       selectedItem: '',
     });
     dispatch({
-      type: 'product/toggle',
+      type: 'topic/toggle',
       payload: false,
     });
   };
 
   handlePageChange = page => {
-    this.getProducts(page);
-  };
-
-  handleClickCard = (e, id) => {
-    console.log('e', e);
-    console.log('id', id);
+    this.getTopics(page);
   };
 
   handleItemOrderChange = e => {
@@ -110,12 +102,12 @@ export default class CardList extends PureComponent {
   };
 
   handleItemOrderConfirm = id => () => {
-    const { dispatch, product } = this.props;
-    const len = product.hotSort.length;
+    const { dispatch, topic } = this.props;
+    const len = topic.topicSort.length;
     const { itemOrder } = this.state;
     if (itemOrder > len || itemOrder < 0) return this.handleItemOrderFinish();
     dispatch({
-      type: 'product/updateHotSort',
+      type: 'topic/updateTopicSort',
       payload: {
         id,
         order: itemOrder,
@@ -124,20 +116,8 @@ export default class CardList extends PureComponent {
     this.handleItemOrderFinish();
   };
 
-  handleToggleHot = () => {
-    const { dispatch } = this.props;
-    dispatch({ type: 'product/toggleHot' });
-    dispatch({ type: 'product/fetchCurrent' });
-  };
-
-  handleHotTypeChange = value => {
-    const { dispatch } = this.props;
-    dispatch({ type: 'product/changeHotType', payload: { hotType: value } });
-    dispatch({ type: 'product/fetchCurrent' });
-  };
-
   render() {
-    const { loading, product } = this.props;
+    const { loading, topic } = this.props;
     const { selectedItem, itemOrder } = this.state;
     const actions = item => {
       const btns = [
@@ -174,37 +154,22 @@ export default class CardList extends PureComponent {
           <div>
             <Pagination
               onChange={this.handlePageChange}
-              current={product.page}
+              current={topic.page}
               pageSize={8}
               defaultCurrent={1}
-              total={product.total}
+              total={topic.total}
             />
             <br />
-            <Switch
-              checkedChildren="爆"
-              unCheckedChildren="爆"
-              onChange={this.handleToggleHot}
-              defaultChecked={product.hot}
-            />
-            <br />
-            <Select onChange={this.handleHotTypeChange} value={product.hotType}>
-              <Select.Option value={1}>春款</Select.Option>
-              <Select.Option value={2}>夏款</Select.Option>
-              <Select.Option value={3}>秋款</Select.Option>
-              <Select.Option value={4}>冬款</Select.Option>
-              <Select.Option value={5}>周边</Select.Option>
-              <Select.Option value={6}>精品</Select.Option>
-            </Select>
           </div>
         }
-        title="产品列表"
+        title="主题列表"
       >
         <div className={styles.cardList}>
           <List
             rowKey="id"
             loading={loading}
             grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}
-            dataSource={['', ...product.list]}
+            dataSource={['', ...topic.list]}
             renderItem={item =>
               item ? (
                 <List.Item key={item.id}>
@@ -218,14 +183,14 @@ export default class CardList extends PureComponent {
               ) : (
                 <List.Item>
                   <Button type="dashed" onClick={this.handleAdd} className={styles.newButton}>
-                    <Icon type="plus" /> 新增产品
+                    <Icon type="plus" /> 新增主题
                   </Button>
                 </List.Item>
               )
             }
           />
         </div>
-        <Form visible={product.toggle} closeModal={this.closeModal} selected={selectedItem} />
+        <Form visible={topic.toggle} closeModal={this.closeModal} selected={selectedItem} />
       </PageHeaderLayout>
     );
   }

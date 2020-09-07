@@ -19,7 +19,17 @@ const menuData = [
         name: '产品类别',
         path: 'category',
       },
+      {
+        name: '专题列表',
+        path: 'topic',
+      },
     ],
+  },
+  {
+    name: '小程序设置',
+    path: 'mp',
+    icon: 'table',
+    children: [{ name: '买家秀设置', path: 'buyer-show' }],
   },
 ];
 // const menuData = [

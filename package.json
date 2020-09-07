@@ -7,7 +7,7 @@
     "precommit": "npm run lint-staged",
     "start": "cross-env ESLINT=none roadhog dev",
     "start:no-proxy": "cross-env NO_PROXY=true ESLINT=none roadhog dev",
-    "build": "cross-env ESLINT=none roadhog build  && rm -rf ../seven-rabbit/src/public && cp -rf dist ../seven-rabbit/src/public",
+    "build": "cross-env ESLINT=none roadhog build  && rm -rf ../seven-rabbit/src/public && mv dist/index.html dist/bundle.html && cp -rf dist ../seven-rabbit/src/public",
     "site": "roadhog-api-doc static && gh-pages -d dist",
     "analyze": "cross-env ANALYZE=true roadhog build",
     "lint:style": "stylelint \"src/**/*.less\" --syntax less",

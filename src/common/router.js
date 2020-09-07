@@ -77,14 +77,18 @@ export const getRouterData = app => {
       component: dynamicWrapper(app, ['user'], () => import('../routes/Index/Index')),
     },
     '/product/list': {
-      component: dynamicWrapper(app, ['list', 'category', 'product'], () =>
+      component: dynamicWrapper(app, ['category', 'product'], () =>
         import('../routes/Product/List')
       ),
     },
     '/product/category': {
-      component: dynamicWrapper(app, ['list', 'category'], () =>
-        import('../routes/Product/Category')
-      ),
+      component: dynamicWrapper(app, ['category'], () => import('../routes/Product/Category')),
+    },
+    '/product/topic': {
+      component: dynamicWrapper(app, ['topic'], () => import('../routes/Product/Topic')),
+    },
+    '/mp/buyer-show': {
+      component: dynamicWrapper(app, ['buyerShow'], () => import('../routes/IndexPage/List')),
     },
     // '/dashboard/analysis': {
     //   component: dynamicWrapper(app, ['chart'], () => import('../routes/Dashboard/Analysis')),

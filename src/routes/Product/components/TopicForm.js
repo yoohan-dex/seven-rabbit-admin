@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Icon, Modal, Form, Input, Upload, Tag, Select, Switch } from 'antd';
+import { Button, Icon, Modal, Form, Upload, Input } from 'antd';
 import { connect } from 'dva';
-import styles from './ProductForm.less';
+import './TopicForm.less';
 
 const FormItem = Form.Item;
-const { Option } = Select;
-const { CheckableTag } = Tag;
 const UploadButton = ({ loading }) => (
   <div>
     <Icon type={loading ? 'loading' : 'plus'} />
@@ -16,11 +14,11 @@ const initialState = {
   selectedId: '',
   name: '',
   cover: '',
+  background: '',
   detail: [],
   features: [],
-  category: '',
   hot: false,
-  hotType: '',
+  title: '',
 
   uploading: false,
   show: false,
@@ -37,8 +35,8 @@ const formItemLayout = {
   },
 };
 
-@connect(({ product, category }) => ({ product, category }))
-export default class ProductForm extends Component {
+@connect(({ topic }) => ({ topic }))
+export default class TopicForm extends Component {
   static defaultProps = {
     visible: false,
   };
@@ -46,16 +44,6 @@ export default class ProductForm extends Component {
   constructor() {
     super();
     this.state = initialState;
-  }
-
-  componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'category/fetchCategory',
-    });
-    dispatch({
-      type: 'category/fetch',
-    });
   }
 
   componentDidUpdate(props) {
@@ -80,13 +68,11 @@ export default class ProductForm extends Component {
       this.setState({
         ...initialState,
         selectedId: selected.id,
-        category: selected.category.id,
         cover: selected.cover,
+        background: selected.background,
         hot: selected.hot,
-        name: selected.name,
-        hotType: selected.hotType,
+        title: selected.title,
         detail: selected.detail.map(d => ({ ...d, uid: d.id })),
-        features: selected.features.map(f => f.id),
       });
     }
   };
@@ -95,15 +81,9 @@ export default class ProductForm extends Component {
     this.setState({ show });
   };
 
-  handleName = e => {
+  handleTitle = e => {
     this.setState({
-      name: e.target.value,
-    });
-  };
-
-  handleCategoryChange = value => {
-    this.setState({
-      category: value,
+      title: e.target.value,
     });
   };
 
@@ -111,6 +91,13 @@ export default class ProductForm extends Component {
     if (info.file.status === 'done') {
       const cover = info.fileList[0].response;
       this.setState({ cover });
+    }
+  };
+
+  handleBackgroundChange = info => {
+    if (info.file.status === 'done') {
+      const background = info.fileList[0].response;
+      this.setState({ background });
     }
   };
 
@@ -150,25 +137,25 @@ export default class ProductForm extends Component {
 
   handleSubmit = () => {
     const { dispatch } = this.props;
-    const { name, category, cover, detail, features, selectedId, hot, hotType } = this.state;
+    const { name, cover, detail, features, selectedId, hot, title, background } = this.state;
     const payload = {
       id: selectedId,
+      title,
       name,
       hot,
-      category,
-      hotType,
+      background: background.id,
       cover: cover.id,
       detail: detail.map(d => d.id),
       features,
     };
     if (selectedId) {
       dispatch({
-        type: 'product/modOne',
+        type: 'topic/modOne',
         payload,
       });
     } else {
       dispatch({
-        type: 'product/post',
+        type: 'topic/post',
         payload,
       });
     }
@@ -180,25 +167,9 @@ export default class ProductForm extends Component {
     });
   };
 
-  handleHotType = value => {
-    this.setState({
-      hotType: parseInt(value, 10),
-    });
-  };
-
   render() {
-    const { visible, closeModal, category } = this.props;
-    const {
-      name,
-      features,
-      cover,
-      detail,
-      uploading,
-      show,
-      hot,
-      category: cty,
-      hotType,
-    } = this.state;
+    const { visible, closeModal } = this.props;
+    const { cover, detail, uploading, show, title, background } = this.state;
     return (
       <Modal
         visible={visible}
@@ -213,24 +184,8 @@ export default class ProductForm extends Component {
         {show ? (
           <Form>
             <FormItem {...formItemLayout} label="名称">
-              <Input placeholder="名称" value={name} onChange={this.handleName} />
+              <Input placeholder="名称" value={title} onChange={this.handleTitle} />
             </FormItem>
-
-            <FormItem {...formItemLayout} label="爆品">
-              <Switch checked={hot} onChange={this.handleHotChange} />
-            </FormItem>
-
-            <FormItem {...formItemLayout} label="爆品类型">
-              <Select onChange={this.handleHotType} value={hotType}>
-                <Select.Option value={1}>春款</Select.Option>
-                <Select.Option value={2}>夏款</Select.Option>
-                <Select.Option value={3}>秋款</Select.Option>
-                <Select.Option value={4}>冬款</Select.Option>
-                <Select.Option value={5}>周边</Select.Option>
-                <Select.Option value={6}>精品</Select.Option>
-              </Select>
-            </FormItem>
-
             <FormItem {...formItemLayout} label="封面">
               <Upload
                 className="avatar-uploader"
@@ -247,6 +202,23 @@ export default class ProductForm extends Component {
                 )}
               </Upload>
             </FormItem>
+            <FormItem {...formItemLayout} label="背景">
+              <Upload
+                className="avatar-uploader"
+                onChange={this.handleBackgroundChange}
+                listType="picture-card"
+                showUploadList={false}
+                action="https://www.sevenrabbit.cn/common/upload"
+                // action="http://localhost:3000/common/upload"
+              >
+                {background && background.url ? (
+                  <img src={background.url} alt="avatar" />
+                ) : (
+                  <UploadButton loading={uploading} />
+                )}
+              </Upload>
+            </FormItem>
+
             <FormItem {...formItemLayout} label="详情图片">
               <Upload
                 onChange={this.handleDetailChange}
@@ -260,39 +232,6 @@ export default class ProductForm extends Component {
                   <Icon type="upload" /> 上传
                 </Button>
               </Upload>
-            </FormItem>
-            <FormItem {...formItemLayout} label="类别">
-              {category.categories.length > 0 ? (
-                <Select
-                  defaultValue={cty || ''}
-                  style={{ width: 200 }}
-                  onChange={this.handleCategoryChange}
-                >
-                  {category.categories.map(c => (
-                    <Option value={c.id} key={c.id}>
-                      {c.name}
-                    </Option>
-                  ))}
-                </Select>
-              ) : (
-                ''
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="特性">
-              {category.list.map(f => (
-                <div key={f.id}>
-                  <p className={styles.filter}>{f.name}</p>
-                  {f.features.map(feature => (
-                    <CheckableTag
-                      key={feature.id}
-                      checked={features.includes(feature.id)}
-                      onChange={this.handleTagCheck(feature.id)}
-                    >
-                      {feature.name}
-                    </CheckableTag>
-                  ))}
-                </div>
-              ))}
             </FormItem>
           </Form>
         ) : (

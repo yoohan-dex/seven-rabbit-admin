@@ -1,6 +1,9 @@
 import moment from 'moment';
 import { parse, stringify } from 'qs';
 
+export const wrapUrl = url => `https://www.sevenrabbit.cn/${url}`;
+// export const wrapUrl = url => `http://localhost:3000/${url}`;
+
 export function fixedZero(val) {
   return val * 1 < 10 ? `0${val}` : val;
 }
